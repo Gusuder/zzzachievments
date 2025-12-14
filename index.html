@@ -77,13 +77,30 @@
   </div>
 
   <div class="io-panel">
-  <div class="io-title">Экспорт / Импорт прогресса</div>
+  <div class="io-header">
+    <div class="io-title">Экспорт / Импорт / Сброс</div>
+    <div class="io-subtitle">Файлы сохраняются локально. Импорт и сброс перезаписывают текущий прогресс.</div>
+  </div>
+
   <div class="io-actions">
-    <button class="io-btn" id="export-btn" type="button">⬇ Экспорт JSON</button>
-    <button class="io-btn" id="import-btn" type="button">⬆ Импорт JSON</button>
+    <button class="io-btn" id="export-btn" type="button">
+      <span class="io-ico">⬇</span><span class="io-text">Экспорт JSON</span>
+    </button>
+
+    <button class="io-btn" id="import-btn" type="button">
+      <span class="io-ico">⬆</span><span class="io-text">Импорт JSON</span>
+    </button>
+
+    <button class="io-btn io-btn-danger" id="reset-btn" type="button">
+      <span class="io-ico">⟲</span><span class="io-text">Сброс прогресса</span>
+    </button>
+
     <input id="import-file" type="file" accept="application/json" hidden>
   </div>
-  <div class="io-hint">Экспорт сохраняет прогресс в файл. Импорт заменит текущий прогресс данными из файла.</div>
+
+  <div class="io-note">
+    Совет: перед сбросом сделай экспорт — так ты сможешь восстановить прогресс в любой момент.
+  </div>
 </div>
 
     <script src="./data.js"></script>

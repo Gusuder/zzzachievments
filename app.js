@@ -37,6 +37,8 @@ function init() {
 
   document.getElementById("import-file").addEventListener("change", handleImportFile);
 
+  document.getElementById("reset-btn").addEventListener("click", resetProgress);
+
 }
 
 function loadProgress() {
@@ -358,5 +360,17 @@ function importProgressFromJson(data) {
   alert("Импорт завершён. Прогресс обновлён.");
 }
 
+function resetProgress() {
+  const ok = confirm("Сбросить весь прогресс? Это действие нельзя отменить.\n\nСовет: нажми «Отмена», сделай экспорт и потом сброс.");
+  if (!ok) return;
+
+  localStorage.removeItem("zzz_ach_progress_v2");
+  loadProgress();
+  renderTabs();
+  renderSubfilters();
+  renderAchievements();
+  updateGlobalStats();
+  alert("Прогресс сброшен.");
+}
 
 document.addEventListener("DOMContentLoaded", init);
