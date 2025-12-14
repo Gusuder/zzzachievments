@@ -1,18 +1,32 @@
-// === ДАННЫЕ БЕЗ ИЗМЕНЕНИЙ ===
-
-
 let currentMain = "history";
 let currentSub = "trust";
 let userProgress = {};
 let searchQuery = "";
 let versionFilter = "";
 let statusFilter = "";
-let lastJustCompleted=null;
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
-function escReg(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
-function highlightHTML(text,q){const t=escapeHtml(text||"");if(!q)return t;const r=new RegExp(escReg(q),"gi");return t.replace(r,m=>`<span class="hl">${m}</span>`);}
+let lastJustCompleted = null;
 
-// === ВАША ЛОГИКА ===
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[m]));
+}
+
+function escReg(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightHTML(text, q) {
+  const t = escapeHtml(text || "");
+  if (!q) return t;
+  const r = new RegExp(escReg(q), "gi");
+  return t.replace(r, (m) => `<span class="hl">${m}</span>`);
+}
+
 function init() {
   loadProgress();
   renderTabs();
@@ -37,7 +51,9 @@ function init() {
 
   document.getElementById("export-btn").addEventListener("click", exportProgressToJson);
 
-  document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+  document.getElementById("import-btn").addEventListener("click", () => {
+    document.getElementById("import-file").click();
+  });
 
   document.getElementById("import-file").addEventListener("change", handleImportFile);
 
@@ -48,9 +64,7 @@ function init() {
 
   ioToggle.addEventListener("click", () => {
     ioPanel.classList.toggle("open");
-});
-  
-
+  });
 }
 
 function loadProgress() {
@@ -61,7 +75,10 @@ function loadProgress() {
     if (!userProgress[main]) userProgress[main] = {};
     for (const sub in ACHIEVEMENTS[main].subfilters) {
       if (!userProgress[main][sub]) {
-        userProgress[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({ completed: false, date: "" }));
+        userProgress[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({
+          completed: false,
+          date: ""
+        }));
       }
     }
   }
@@ -74,21 +91,31 @@ function saveProgress() {
 }
 
 function getStats(mainKey = null, subKey = null) {
-  let total = 0, completed = 0, maxPoly = 0, earnedPoly = 0;
-  let bronze = 0, silver = 0, gold = 0;
+  let total = 0;
+  let completed = 0;
+  let maxPoly = 0;
+  let earnedPoly = 0;
+  let bronze = 0;
+  let silver = 0;
+  let gold = 0;
 
   const mains = mainKey ? [mainKey] : Object.keys(ACHIEVEMENTS);
+
   for (const main of mains) {
     const subs = subKey ? [subKey] : Object.keys(ACHIEVEMENTS[main].data);
+
     for (const sub of subs) {
       const achs = ACHIEVEMENTS[main].data[sub];
       const prog = userProgress[main][sub] || [];
+
       achs.forEach((a, i) => {
         total++;
         maxPoly += a.reward;
+
         if (prog[i]?.completed) {
           completed++;
           earnedPoly += a.reward;
+
           if (a.tier === "bronze") bronze++;
           else if (a.tier === "silver") silver++;
           else if (a.tier === "gold") gold++;
@@ -96,11 +123,13 @@ function getStats(mainKey = null, subKey = null) {
       });
     }
   }
+
   return { total, completed, maxPoly, earnedPoly, bronze, silver, gold };
 }
 
 function updateGlobalStats() {
   const global = getStats();
+
   document.getElementById("global-ach").textContent = `${global.completed}/${global.total}`;
   document.getElementById("global-poly").textContent = `${global.earnedPoly}/${global.maxPoly}`;
   document.getElementById("current-filter").textContent = ACHIEVEMENTS[currentMain]?.name || "—";
@@ -114,31 +143,39 @@ function updateGlobalStats() {
   `;
 }
 
-function updateSubfilterStats(){
-  const stats=getStats(currentMain,currentSub);
-  document.getElementById("subfilter-name").textContent=ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
-  document.getElementById("subfilter-stats").innerHTML=`<span class="chip">Достижений:<b>${stats.completed}/${stats.total}</b></span><span class="chip chip--poly"> Полихром: <img src="icons/poly.png" alt="✦"><b>${stats.earnedPoly}/${stats.maxPoly}</b></span>`;
-  const percent=stats.total?Math.round((stats.completed/stats.total)*100):0;
-  const bar=document.getElementById("subfilter-progress-bar");
-  if(bar)bar.style.width=`${percent}%`;
+function updateSubfilterStats() {
+  const stats = getStats(currentMain, currentSub);
+
+  document.getElementById("subfilter-name").textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
+  document.getElementById("subfilter-stats").innerHTML =
+    `<span class="chip">Достижений:<b>${stats.completed}/${stats.total}</b></span>` +
+    `<span class="chip chip--poly">Полихром:<img src="icons/poly.png" alt="✦"><b>${stats.earnedPoly}/${stats.maxPoly}</b></span>`;
+
+  const percent = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
+  const bar = document.getElementById("subfilter-progress-bar");
+  if (bar) bar.style.width = `${percent}%`;
 }
 
 function renderTabs() {
   const tabs = document.querySelector(".tabs");
   tabs.innerHTML = "";
+
   for (const key in ACHIEVEMENTS) {
     const tab = document.createElement("div");
     tab.className = "tab" + (key === currentMain ? " active" : "");
     tab.textContent = ACHIEVEMENTS[key].name;
     tab.dataset.main = key;
+
     tab.addEventListener("click", () => {
       currentMain = key;
       currentSub = Object.keys(ACHIEVEMENTS[key].subfilters)[0];
+
       renderTabs();
       renderSubfilters();
       renderAchievements();
       updateGlobalStats();
     });
+
     tabs.appendChild(tab);
   }
 }
@@ -146,7 +183,9 @@ function renderTabs() {
 function renderSubfilters() {
   const container = document.getElementById("subfilters");
   container.innerHTML = "";
+
   const subfilters = ACHIEVEMENTS[currentMain].subfilters;
+
   for (const key in subfilters) {
     const stats = getStats(currentMain, key);
     const percent = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
@@ -162,6 +201,7 @@ function renderSubfilters() {
         <div class="bar" style="width: ${percent}%"></div>
       </div>
     `;
+
     item.addEventListener("click", () => {
       currentSub = key;
       renderSubfilters();
@@ -169,6 +209,7 @@ function renderSubfilters() {
       updateSubfilterStats();
       updateGlobalStats();
     });
+
     container.appendChild(item);
   }
 }
@@ -182,11 +223,16 @@ function renderAchievements() {
 
   const filtered = achList.filter((ach, i) => {
     const prog = progress[i] || { completed: false };
-    const matchesSearch = !searchQuery ||
+
+    const matchesSearch =
+      !searchQuery ||
       ach.title.toLowerCase().includes(searchQuery) ||
       (ach.desc && ach.desc.toLowerCase().includes(searchQuery));
+
     const matchesVersion = !versionFilter || ach.version === versionFilter;
-    const matchesStatus = !statusFilter ||
+
+    const matchesStatus =
+      !statusFilter ||
       (statusFilter === "completed" && prog.completed) ||
       (statusFilter === "incomplete" && !prog.completed);
 
@@ -199,51 +245,63 @@ function renderAchievements() {
   }
 
   filtered.forEach((ach) => {
-    const realIndex = achList.findIndex(a => a.id === ach.id);
+    const realIndex = achList.findIndex((a) => a.id === ach.id);
     const prog = progress[realIndex] || { completed: false, date: "" };
 
-    const item=document.createElement("div");
-    item.className=`ach-item ${prog.completed?'completed':''}`;
-    item.dataset.tier=ach.tier;
-    if(lastJustCompleted&&lastJustCompleted.main===currentMain&&lastJustCompleted.sub===currentSub&&lastJustCompleted.id===ach.id&&(Date.now()-lastJustCompleted.t)<600)item.classList.add("just-completed");
+    const item = document.createElement("div");
+    item.className = `ach-item ${prog.completed ? "completed" : ""}`;
+    item.dataset.tier = ach.tier;
 
+    if (
+      lastJustCompleted &&
+      lastJustCompleted.main === currentMain &&
+      lastJustCompleted.sub === currentSub &&
+      lastJustCompleted.id === ach.id &&
+      Date.now() - lastJustCompleted.t < 600
+    ) {
+      item.classList.add("just-completed");
+    }
 
     const tierDiv = document.createElement("div");
     tierDiv.className = "tier-icon";
+
     const badge = document.createElement("div");
     badge.className = "tier-badge";
 
     let tierImgSrc = "icons/bronze.png";
     if (ach.tier === "silver") tierImgSrc = "icons/silver.png";
     else if (ach.tier === "gold") tierImgSrc = "icons/gold.png";
+
     badge.innerHTML = `<img src="${tierImgSrc}" alt="${ach.tier.charAt(0).toUpperCase()}">`;
     tierDiv.appendChild(badge);
 
     const ver = document.createElement("div");
-    ver.className="version-tag chip chip--ver";
+    ver.className = "version-tag chip chip--ver";
     ver.dataset.version = ach.version;
     ver.textContent = ach.version;
     tierDiv.appendChild(ver);
 
     const info = document.createElement("div");
     info.className = "ach-info";
+
     const title = document.createElement("div");
     title.className = "ach-title";
-    title.innerHTML=highlightHTML(ach.title,searchQuery);
+    title.innerHTML = highlightHTML(ach.title, searchQuery);
     info.appendChild(title);
 
     if (ach.desc) {
       const desc = document.createElement("div");
       desc.className = "ach-desc";
-      desc.innerHTML=highlightHTML(ach.desc,searchQuery);
+      desc.innerHTML = highlightHTML(ach.desc, searchQuery);
       info.appendChild(desc);
     }
 
     const footer = document.createElement("div");
     footer.className = "ach-footer";
+
     const reward = document.createElement("div");
     reward.className = "reward";
-    reward.innerHTML=`<span class="chip chip--poly"><img src="icons/poly.png" alt="✦"><b>${ach.reward}</b></span>`;
+    reward.innerHTML = `<span class="chip chip--poly"><img src="icons/poly.png" alt="✦"><b>${ach.reward}</b></span>`;
     footer.appendChild(reward);
 
     if (prog.completed && prog.date) {
@@ -256,6 +314,7 @@ function renderAchievements() {
     info.appendChild(footer);
     item.appendChild(tierDiv);
     item.appendChild(info);
+
     item.addEventListener("click", () => toggleAchievement(realIndex));
     list.appendChild(item);
   });
@@ -265,44 +324,59 @@ function renderAchievements() {
 
 function toggleAchievement(index) {
   const ach = userProgress[currentMain][currentSub][index];
+
   if (ach.completed) {
     ach.completed = false;
     ach.date = "";
   } else {
     ach.completed = true;
     ach.date = new Date().toLocaleDateString("ru-RU");
-    lastJustCompleted={main:currentMain,sub:currentSub,id:ACHIEVEMENTS[currentMain].data[currentSub][index].id,t:Date.now()};
+    lastJustCompleted = {
+      main: currentMain,
+      sub: currentSub,
+      id: ACHIEVEMENTS[currentMain].data[currentSub][index].id,
+      t: Date.now()
+    };
   }
+
   saveProgress();
   renderAchievements();
 }
 
 function buildProgressById() {
   const byId = {};
+
   for (const main in ACHIEVEMENTS) {
     byId[main] = {};
+
     for (const sub in ACHIEVEMENTS[main].data) {
       byId[main][sub] = {};
+
       const list = ACHIEVEMENTS[main].data[sub];
       const progArr = (userProgress[main] && userProgress[main][sub]) ? userProgress[main][sub] : [];
+
       list.forEach((a, i) => {
         const p = progArr[i] || { completed: false, date: "" };
         byId[main][sub][a.id] = { completed: !!p.completed, date: p.date || "" };
       });
     }
   }
+
   return byId;
 }
 
 function downloadTextFile(filename, text) {
   const blob = new Blob([text], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+
   document.body.appendChild(a);
   a.click();
   a.remove();
+
   URL.revokeObjectURL(url);
 }
 
@@ -314,6 +388,7 @@ function exportProgressToJson() {
     storageKey: "zzz_ach_progress_v2",
     progressById: buildProgressById()
   };
+
   const safeDate = new Date().toISOString().slice(0, 10);
   downloadTextFile(`zzz-progress-${safeDate}.json`, JSON.stringify(payload, null, 2));
 }
@@ -321,7 +396,9 @@ function exportProgressToJson() {
 function handleImportFile(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
+
   const reader = new FileReader();
+
   reader.onload = () => {
     try {
       const text = String(reader.result || "");
@@ -333,15 +410,21 @@ function handleImportFile(e) {
       e.target.value = "";
     }
   };
+
   reader.readAsText(file, "utf-8");
 }
 
 function importProgressFromJson(data) {
   const next = {};
+
   for (const main in ACHIEVEMENTS) {
     next[main] = {};
+
     for (const sub in ACHIEVEMENTS[main].subfilters) {
-      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({ completed: false, date: "" }));
+      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({
+        completed: false,
+        date: ""
+      }));
     }
   }
 
@@ -351,6 +434,7 @@ function importProgressFromJson(data) {
   for (const main in ACHIEVEMENTS) {
     for (const sub in ACHIEVEMENTS[main].data) {
       const list = ACHIEVEMENTS[main].data[sub];
+
       if (byId && byId[main] && byId[main][sub]) {
         list.forEach((a, i) => {
           const item = byId[main][sub][a.id];
@@ -379,7 +463,9 @@ function importProgressFromJson(data) {
 }
 
 function resetProgress() {
-  const ok = confirm("Сбросить весь прогресс? Это действие нельзя отменить.\n\nСовет: нажми «Отмена», сделай экспорт и потом сброс.");
+  const ok = confirm(
+    "Сбросить весь прогресс? Это действие нельзя отменить.\n\nСовет: нажми «Отмена», сделай экспорт и потом сброс."
+  );
   if (!ok) return;
 
   localStorage.removeItem("zzz_ach_progress_v2");
