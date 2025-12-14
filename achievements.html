@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZZZ — Трекер Достижений</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a class="nav-back" href="./index.html" id="back-home">← На главную</a>
+      <div class="title">Zenless Zone Zero — Достижения</div>
+
+      <div class="search-controls">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="🔍 Поиск...">
+        </div>
+
+        <div class="version-filter-box">
+          <select id="version-filter">
+            <option value="">Все версии</option>
+            <option value="v1.0">v1.0</option>
+            <option value="v1.1">v1.1</option>
+            <option value="v1.2">v1.2</option>
+          </select>
+        </div>
+
+        <div class="status-filter-box">
+          <select id="status-filter">
+            <option value="">Все</option>
+            <option value="completed">Выполнено</option>
+            <option value="incomplete">Не выполнено</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="global-stats">
+      <div class="stat-group">
+        <span class="stat-label">Всего:</span>
+        <span class="stat-value" id="global-ach">0/0</span>
+      </div>
+
+      <div class="stat-group">
+        <span class="stat-label">Полихром:</span>
+        <img src="icons/poly.png" alt="✦" class="poly-icon">
+        <span class="stat-value poly-value" id="global-poly">0/0</span>
+      </div>
+
+      <div class="stat-group tier-summary" id="tier-summary"></div>
+
+      <div class="stat-group">
+        <span class="stat-label">Фильтр:</span>
+        <span class="stat-value" id="current-filter">—</span>
+      </div>
+
+      <div class="stat-group">
+        <span class="stat-label">Подфильтр:</span>
+        <span class="stat-value" id="current-subfilter">—</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-main="history">История</div>
+      <div class="tab" data-main="city">Город</div>
+      <div class="tab" data-main="tactics">Тактика</div>
+      <div class="tab" data-main="exploration">Исследование</div>
+    </div>
+
+    <div class="main">
+      <div class="sidebar">
+        <div class="sidebar-title">Подкатегории</div>
+        <div id="subfilters"></div>
+      </div>
+
+      <div class="achievements-panel">
+        <div class="subfilter-header">
+          <span id="subfilter-name">—</span>
+          <span class="subfilter-stats" id="subfilter-stats">...</span>
+        </div>
+
+        <div class="subfilter-progress-top">
+          <div class="bar" id="subfilter-progress-bar" style="width:0%"></div>
+        </div>
+
+        <div class="ach-list" id="ach-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="io-panel compact">
+    <button class="io-toggle" id="io-toggle" type="button" aria-label="Настройки">
+      <span class="io-gear">⚙</span>
+    </button>
+
+    <div class="io-content" id="io-content">
+      <div class="io-header">
+        <div class="io-title">Настройки прогресса</div>
+        <div class="io-subtitle">Экспорт, импорт и сброс данных</div>
+      </div>
+
+      <div class="io-actions">
+        <button class="io-btn" id="export-btn" type="button">
+          <span class="io-ico">⬇</span>
+          <span class="io-text">Экспорт JSON</span>
+        </button>
+
+        <button class="io-btn" id="import-btn" type="button">
+          <span class="io-ico">⬆</span>
+          <span class="io-text">Импорт JSON</span>
+        </button>
+
+        <button class="io-btn io-btn-danger" id="reset-btn" type="button">
+          <span class="io-ico">⟲</span>
+          <span class="io-text">Сброс прогресса</span>
+        </button>
+
+        <input id="import-file" type="file" accept="application/json" hidden>
+      </div>
+
+      <div class="io-note">
+        Рекомендуется сделать экспорт перед сбросом.
+      </div>
+    </div>
+  </div>
+
+  <script src="./data.js"></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>

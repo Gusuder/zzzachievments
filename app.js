@@ -27,6 +27,10 @@ function highlightHTML(text, q) {
   return t.replace(r, (m) => `<span class="hl">${m}</span>`);
 }
 
+function touchHomeSync() {
+  localStorage.setItem("zzz_home_sync", String(Date.now()));
+}
+
 function init() {
   loadProgress();
   renderTabs();
@@ -34,37 +38,59 @@ function init() {
   renderAchievements();
   updateGlobalStats();
 
-  document.getElementById("search-input").addEventListener("input", (e) => {
-    searchQuery = e.target.value.trim().toLowerCase();
-    renderAchievements();
-  });
+  const searchInput = document.getElementById("search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      renderAchievements();
+    });
+  }
 
-  document.getElementById("version-filter").addEventListener("change", (e) => {
-    versionFilter = e.target.value;
-    renderAchievements();
-  });
+  const versionSelect = document.getElementById("version-filter");
+  if (versionSelect) {
+    versionSelect.addEventListener("change", (e) => {
+      versionFilter = e.target.value;
+      renderAchievements();
+    });
+  }
 
-  document.getElementById("status-filter").addEventListener("change", (e) => {
-    statusFilter = e.target.value;
-    renderAchievements();
-  });
+  const statusSelect = document.getElementById("status-filter");
+  if (statusSelect) {
+    statusSelect.addEventListener("change", (e) => {
+      statusFilter = e.target.value;
+      renderAchievements();
+    });
+  }
 
-  document.getElementById("export-btn").addEventListener("click", exportProgressToJson);
+  const exportBtn = document.getElementById("export-btn");
+  if (exportBtn) exportBtn.addEventListener("click", exportProgressToJson);
 
-  document.getElementById("import-btn").addEventListener("click", () => {
-    document.getElementById("import-file").click();
-  });
+  const importBtn = document.getElementById("import-btn");
+  const importFile = document.getElementById("import-file");
+  if (importBtn && importFile) {
+    importBtn.addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", handleImportFile);
+  }
 
-  document.getElementById("import-file").addEventListener("change", handleImportFile);
-
-  document.getElementById("reset-btn").addEventListener("click", resetProgress);
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) resetBtn.addEventListener("click", resetProgress);
 
   const ioPanel = document.querySelector(".io-panel");
   const ioToggle = document.getElementById("io-toggle");
+  if (ioPanel && ioToggle) {
+    ioToggle.addEventListener("click", () => {
+      ioPanel.classList.toggle("open");
+    });
+  }
 
-  ioToggle.addEventListener("click", () => {
-    ioPanel.classList.toggle("open");
-  });
+  const back = document.getElementById("back-home");
+  if (back) {
+    back.addEventListener("click", (e) => {
+      e.preventDefault();
+      touchHomeSync();
+      location.href = `./index.html?t=${Date.now()}`;
+    });
+  }
 }
 
 function loadProgress() {
@@ -86,6 +112,7 @@ function loadProgress() {
 
 function saveProgress() {
   localStorage.setItem("zzz_ach_progress_v2", JSON.stringify(userProgress));
+  touchHomeSync();
   updateGlobalStats();
   renderSubfilters();
 }
@@ -100,25 +127,20 @@ function getStats(mainKey = null, subKey = null) {
   let gold = 0;
 
   const mains = mainKey ? [mainKey] : Object.keys(ACHIEVEMENTS);
-
   for (const main of mains) {
     const subs = subKey ? [subKey] : Object.keys(ACHIEVEMENTS[main].data);
-
     for (const sub of subs) {
       const achs = ACHIEVEMENTS[main].data[sub];
       const prog = userProgress[main][sub] || [];
-
       achs.forEach((a, i) => {
-        total++;
+        total += 1;
         maxPoly += a.reward;
-
         if (prog[i]?.completed) {
-          completed++;
+          completed += 1;
           earnedPoly += a.reward;
-
-          if (a.tier === "bronze") bronze++;
-          else if (a.tier === "silver") silver++;
-          else if (a.tier === "gold") gold++;
+          if (a.tier === "bronze") bronze += 1;
+          else if (a.tier === "silver") silver += 1;
+          else if (a.tier === "gold") gold += 1;
         }
       });
     }
@@ -129,27 +151,38 @@ function getStats(mainKey = null, subKey = null) {
 
 function updateGlobalStats() {
   const global = getStats();
+  const globalAch = document.getElementById("global-ach");
+  const globalPoly = document.getElementById("global-poly");
+  const currentFilter = document.getElementById("current-filter");
+  const currentSubfilter = document.getElementById("current-subfilter");
 
-  document.getElementById("global-ach").textContent = `${global.completed}/${global.total}`;
-  document.getElementById("global-poly").textContent = `${global.earnedPoly}/${global.maxPoly}`;
-  document.getElementById("current-filter").textContent = ACHIEVEMENTS[currentMain]?.name || "—";
-  document.getElementById("current-subfilter").textContent = ACHIEVEMENTS[currentMain]?.subfilters[currentSub]?.name || "—";
+  if (globalAch) globalAch.textContent = `${global.completed}/${global.total}`;
+  if (globalPoly) globalPoly.textContent = `${global.earnedPoly}/${global.maxPoly}`;
+  if (currentFilter) currentFilter.textContent = ACHIEVEMENTS[currentMain]?.name || "—";
+  if (currentSubfilter) currentSubfilter.textContent = ACHIEVEMENTS[currentMain]?.subfilters[currentSub]?.name || "—";
 
   const tierSummary = document.getElementById("tier-summary");
-  tierSummary.innerHTML = `
-    <span class="tier-item"><img src="icons/bronze.png" alt="B"> x${global.bronze}</span>
-    <span class="tier-item"><img src="icons/silver.png" alt="S"> x${global.silver}</span>
-    <span class="tier-item"><img src="icons/gold.png" alt="G"> x${global.gold}</span>
-  `;
+  if (tierSummary) {
+    tierSummary.innerHTML = `
+      <span class="tier-item"><img src="icons/bronze.png" alt="B"> x${global.bronze}</span>
+      <span class="tier-item"><img src="icons/silver.png" alt="S"> x${global.silver}</span>
+      <span class="tier-item"><img src="icons/gold.png" alt="G"> x${global.gold}</span>
+    `;
+  }
 }
 
 function updateSubfilterStats() {
   const stats = getStats(currentMain, currentSub);
 
-  document.getElementById("subfilter-name").textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
-  document.getElementById("subfilter-stats").innerHTML =
-    `<span class="chip">Достижений:<b>${stats.completed}/${stats.total}</b></span>` +
-    `<span class="chip chip--poly">Полихром:<img src="icons/poly.png" alt="✦"><b>${stats.earnedPoly}/${stats.maxPoly}</b></span>`;
+  const nameEl = document.getElementById("subfilter-name");
+  const statsEl = document.getElementById("subfilter-stats");
+  if (nameEl) nameEl.textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
+
+  if (statsEl) {
+    statsEl.innerHTML =
+      `<span class="chip">Достижений:<b>${stats.completed}/${stats.total}</b></span>` +
+      `<span class="chip chip--poly">Полихром:<img src="icons/poly.png" alt="✦"><b>${stats.earnedPoly}/${stats.maxPoly}</b></span>`;
+  }
 
   const percent = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
   const bar = document.getElementById("subfilter-progress-bar");
@@ -158,8 +191,9 @@ function updateSubfilterStats() {
 
 function renderTabs() {
   const tabs = document.querySelector(".tabs");
-  tabs.innerHTML = "";
+  if (!tabs) return;
 
+  tabs.innerHTML = "";
   for (const key in ACHIEVEMENTS) {
     const tab = document.createElement("div");
     tab.className = "tab" + (key === currentMain ? " active" : "");
@@ -169,7 +203,6 @@ function renderTabs() {
     tab.addEventListener("click", () => {
       currentMain = key;
       currentSub = Object.keys(ACHIEVEMENTS[key].subfilters)[0];
-
       renderTabs();
       renderSubfilters();
       renderAchievements();
@@ -182,8 +215,9 @@ function renderTabs() {
 
 function renderSubfilters() {
   const container = document.getElementById("subfilters");
-  container.innerHTML = "";
+  if (!container) return;
 
+  container.innerHTML = "";
   const subfilters = ACHIEVEMENTS[currentMain].subfilters;
 
   for (const key in subfilters) {
@@ -216,6 +250,8 @@ function renderSubfilters() {
 
 function renderAchievements() {
   const list = document.getElementById("ach-list");
+  if (!list) return;
+
   list.innerHTML = "";
 
   const achList = ACHIEVEMENTS[currentMain].data[currentSub] || [];
@@ -241,6 +277,7 @@ function renderAchievements() {
 
   if (filtered.length === 0) {
     list.innerHTML = `<div style="text-align:center; padding:30px; color:#777">Ничего не найдено</div>`;
+    updateSubfilterStats();
     return;
   }
 
@@ -345,23 +382,18 @@ function toggleAchievement(index) {
 
 function buildProgressById() {
   const byId = {};
-
   for (const main in ACHIEVEMENTS) {
     byId[main] = {};
-
     for (const sub in ACHIEVEMENTS[main].data) {
       byId[main][sub] = {};
-
       const list = ACHIEVEMENTS[main].data[sub];
       const progArr = (userProgress[main] && userProgress[main][sub]) ? userProgress[main][sub] : [];
-
       list.forEach((a, i) => {
         const p = progArr[i] || { completed: false, date: "" };
         byId[main][sub][a.id] = { completed: !!p.completed, date: p.date || "" };
       });
     }
   }
-
   return byId;
 }
 
@@ -398,7 +430,6 @@ function handleImportFile(e) {
   if (!file) return;
 
   const reader = new FileReader();
-
   reader.onload = () => {
     try {
       const text = String(reader.result || "");
@@ -416,15 +447,10 @@ function handleImportFile(e) {
 
 function importProgressFromJson(data) {
   const next = {};
-
   for (const main in ACHIEVEMENTS) {
     next[main] = {};
-
     for (const sub in ACHIEVEMENTS[main].subfilters) {
-      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({
-        completed: false,
-        date: ""
-      }));
+      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({ completed: false, date: "" }));
     }
   }
 
@@ -469,6 +495,7 @@ function resetProgress() {
   if (!ok) return;
 
   localStorage.removeItem("zzz_ach_progress_v2");
+  touchHomeSync();
   loadProgress();
   renderTabs();
   renderSubfilters();
