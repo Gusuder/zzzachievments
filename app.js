@@ -30,9 +30,12 @@ function init() {
     statusFilter = e.target.value;
     renderAchievements();
   });
+
   document.getElementById("export-btn").addEventListener("click", exportProgressToJson);
-    document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
-    document.getElementById("import-file").addEventListener("change", handleImportFile);
+
+  document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+
+  document.getElementById("import-file").addEventListener("change", handleImportFile);
 
 }
 
