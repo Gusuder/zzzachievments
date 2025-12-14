@@ -380,3 +380,40 @@ body::before {
   .search-controls { width: 100%; }
   .search-box, .version-filter-box, .status-filter-box { min-width: auto; }
 }
+
+.io-panel {
+  margin-top: 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.io-title {
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.io-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.io-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--item);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.io-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+.io-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.75;
+}

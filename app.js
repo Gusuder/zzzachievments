@@ -30,6 +30,10 @@ function init() {
     statusFilter = e.target.value;
     renderAchievements();
   });
+  document.getElementById("export-btn").addEventListener("click", exportProgressToJson);
+    document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+    document.getElementById("import-file").addEventListener("change", handleImportFile);
+
 }
 
 function loadProgress() {
@@ -249,5 +253,107 @@ function toggleAchievement(index) {
   saveProgress();
   renderAchievements();
 }
+
+function buildProgressById() {
+  const byId = {};
+  for (const main in ACHIEVEMENTS) {
+    byId[main] = {};
+    for (const sub in ACHIEVEMENTS[main].data) {
+      byId[main][sub] = {};
+      const list = ACHIEVEMENTS[main].data[sub];
+      const progArr = (userProgress[main] && userProgress[main][sub]) ? userProgress[main][sub] : [];
+      list.forEach((a, i) => {
+        const p = progArr[i] || { completed: false, date: "" };
+        byId[main][sub][a.id] = { completed: !!p.completed, date: p.date || "" };
+      });
+    }
+  }
+  return byId;
+}
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportProgressToJson() {
+  const payload = {
+    schema: "zzz-achievements-progress",
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    storageKey: "zzz_ach_progress_v2",
+    progressById: buildProgressById()
+  };
+  const safeDate = new Date().toISOString().slice(0, 10);
+  downloadTextFile(`zzz-progress-${safeDate}.json`, JSON.stringify(payload, null, 2));
+}
+
+function handleImportFile(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = String(reader.result || "");
+      const parsed = JSON.parse(text);
+      importProgressFromJson(parsed);
+    } catch (err) {
+      alert("Не удалось прочитать JSON-файл. Проверь формат.");
+    } finally {
+      e.target.value = "";
+    }
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+function importProgressFromJson(data) {
+  const next = {};
+  for (const main in ACHIEVEMENTS) {
+    next[main] = {};
+    for (const sub in ACHIEVEMENTS[main].subfilters) {
+      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({ completed: false, date: "" }));
+    }
+  }
+
+  const byId = (data && data.progressById && typeof data.progressById === "object") ? data.progressById : null;
+  const legacy = (!byId && data && typeof data === "object") ? data : null;
+
+  for (const main in ACHIEVEMENTS) {
+    for (const sub in ACHIEVEMENTS[main].data) {
+      const list = ACHIEVEMENTS[main].data[sub];
+      if (byId && byId[main] && byId[main][sub]) {
+        list.forEach((a, i) => {
+          const item = byId[main][sub][a.id];
+          if (item && typeof item === "object") {
+            next[main][sub][i].completed = !!item.completed;
+            next[main][sub][i].date = item.date ? String(item.date) : "";
+          }
+        });
+      } else if (legacy && legacy[main] && legacy[main][sub] && Array.isArray(legacy[main][sub])) {
+        legacy[main][sub].forEach((p, i) => {
+          if (!next[main][sub][i]) return;
+          next[main][sub][i].completed = !!(p && p.completed);
+          next[main][sub][i].date = (p && p.date) ? String(p.date) : "";
+        });
+      }
+    }
+  }
+
+  userProgress = next;
+  saveProgress();
+  renderTabs();
+  renderSubfilters();
+  renderAchievements();
+  updateGlobalStats();
+  alert("Импорт завершён. Прогресс обновлён.");
+}
+
 
 document.addEventListener("DOMContentLoaded", init);

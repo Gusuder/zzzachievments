@@ -76,6 +76,16 @@
     </div>
   </div>
 
+  <div class="io-panel">
+  <div class="io-title">Экспорт / Импорт прогресса</div>
+  <div class="io-actions">
+    <button class="io-btn" id="export-btn" type="button">⬇ Экспорт JSON</button>
+    <button class="io-btn" id="import-btn" type="button">⬆ Импорт JSON</button>
+    <input id="import-file" type="file" accept="application/json" hidden>
+  </div>
+  <div class="io-hint">Экспорт сохраняет прогресс в файл. Импорт заменит текущий прогресс данными из файла.</div>
+</div>
+
     <script src="./data.js"></script>
   <script src="./app.js" defer></script>
 </body>
