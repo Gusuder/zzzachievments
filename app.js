@@ -7,6 +7,10 @@ let userProgress = {};
 let searchQuery = "";
 let versionFilter = "";
 let statusFilter = "";
+let lastJustCompleted=null;
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
+function escReg(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+function highlightHTML(text,q){const t=escapeHtml(text||"");if(!q)return t;const r=new RegExp(escReg(q),"gi");return t.replace(r,m=>`<span class="hl">${m}</span>`);}
 
 // === ВАША ЛОГИКА ===
 function init() {
@@ -45,7 +49,7 @@ function init() {
   ioToggle.addEventListener("click", () => {
     ioPanel.classList.toggle("open");
 });
-
+  
 
 }
 
@@ -110,11 +114,13 @@ function updateGlobalStats() {
   `;
 }
 
-function updateSubfilterStats() {
-  const stats = getStats(currentMain, currentSub);
-  document.getElementById("subfilter-name").textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
-  document.getElementById("subfilter-stats").innerHTML =
-    `Достижений: <b>${stats.completed}/${stats.total}</b> • <img src="icons/poly.png" alt="✦" class="poly-icon poly-icon--mini"> Полихром: <b>${stats.earnedPoly}/${stats.maxPoly}</b>`;
+function updateSubfilterStats(){
+  const stats=getStats(currentMain,currentSub);
+  document.getElementById("subfilter-name").textContent=ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
+  document.getElementById("subfilter-stats").innerHTML=`<span class="chip">Достижений:<b>${stats.completed}/${stats.total}</b></span><span class="chip chip--poly"> Полихром: <img src="icons/poly.png" alt="✦"><b>${stats.earnedPoly}/${stats.maxPoly}</b></span>`;
+  const percent=stats.total?Math.round((stats.completed/stats.total)*100):0;
+  const bar=document.getElementById("subfilter-progress-bar");
+  if(bar)bar.style.width=`${percent}%`;
 }
 
 function renderTabs() {
@@ -196,8 +202,11 @@ function renderAchievements() {
     const realIndex = achList.findIndex(a => a.id === ach.id);
     const prog = progress[realIndex] || { completed: false, date: "" };
 
-    const item = document.createElement("div");
-    item.className = `ach-item ${prog.completed ? "completed" : ""}`;
+    const item=document.createElement("div");
+    item.className=`ach-item ${prog.completed?'completed':''}`;
+    item.dataset.tier=ach.tier;
+    if(lastJustCompleted&&lastJustCompleted.main===currentMain&&lastJustCompleted.sub===currentSub&&lastJustCompleted.id===ach.id&&(Date.now()-lastJustCompleted.t)<600)item.classList.add("just-completed");
+
 
     const tierDiv = document.createElement("div");
     tierDiv.className = "tier-icon";
@@ -211,7 +220,7 @@ function renderAchievements() {
     tierDiv.appendChild(badge);
 
     const ver = document.createElement("div");
-    ver.className = "version-tag";
+    ver.className="version-tag chip chip--ver";
     ver.dataset.version = ach.version;
     ver.textContent = ach.version;
     tierDiv.appendChild(ver);
@@ -220,13 +229,13 @@ function renderAchievements() {
     info.className = "ach-info";
     const title = document.createElement("div");
     title.className = "ach-title";
-    title.textContent = ach.title;
+    title.innerHTML=highlightHTML(ach.title,searchQuery);
     info.appendChild(title);
 
     if (ach.desc) {
       const desc = document.createElement("div");
       desc.className = "ach-desc";
-      desc.textContent = ach.desc;
+      desc.innerHTML=highlightHTML(ach.desc,searchQuery);
       info.appendChild(desc);
     }
 
@@ -234,7 +243,7 @@ function renderAchievements() {
     footer.className = "ach-footer";
     const reward = document.createElement("div");
     reward.className = "reward";
-    reward.innerHTML = `<img src="icons/poly.png" alt="✦" class="poly-icon"> ${ach.reward}`;
+    reward.innerHTML=`<span class="chip chip--poly"><img src="icons/poly.png" alt="✦"><b>${ach.reward}</b></span>`;
     footer.appendChild(reward);
 
     if (prog.completed && prog.date) {
@@ -262,6 +271,7 @@ function toggleAchievement(index) {
   } else {
     ach.completed = true;
     ach.date = new Date().toLocaleDateString("ru-RU");
+    lastJustCompleted={main:currentMain,sub:currentSub,id:ACHIEVEMENTS[currentMain].data[currentSub][index].id,t:Date.now()};
   }
   saveProgress();
   renderAchievements();
