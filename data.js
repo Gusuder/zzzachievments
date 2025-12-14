@@ -136,6 +136,4 @@ const ACHIEVEMENTS = {
       ]
     }
   }
-
-  /* city, tactics, exploration — БЕЗ ИЗМЕНЕНИЙ */
 };
