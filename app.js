@@ -39,6 +39,14 @@ function init() {
 
   document.getElementById("reset-btn").addEventListener("click", resetProgress);
 
+  const ioPanel = document.querySelector(".io-panel");
+  const ioToggle = document.getElementById("io-toggle");
+
+  ioToggle.addEventListener("click", () => {
+    ioPanel.classList.toggle("open");
+});
+
+
 }
 
 function loadProgress() {

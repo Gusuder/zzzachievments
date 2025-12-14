@@ -76,30 +76,36 @@
     </div>
   </div>
 
-  <div class="io-panel">
-  <div class="io-header">
-    <div class="io-title">Экспорт / Импорт / Сброс</div>
-    <div class="io-subtitle">Файлы сохраняются локально. Импорт и сброс перезаписывают текущий прогресс.</div>
-  </div>
+  <div class="io-panel compact">
+  <button class="io-toggle" id="io-toggle" type="button" aria-label="Настройки">
+    <span class="io-gear">⚙</span>
+  </button>
 
-  <div class="io-actions">
-    <button class="io-btn" id="export-btn" type="button">
-      <span class="io-ico">⬇</span><span class="io-text">Экспорт JSON</span>
-    </button>
+  <div class="io-content" id="io-content">
+    <div class="io-header">
+      <div class="io-title">Настройки прогресса</div>
+      <div class="io-subtitle">Экспорт, импорт и сброс данных</div>
+    </div>
 
-    <button class="io-btn" id="import-btn" type="button">
-      <span class="io-ico">⬆</span><span class="io-text">Импорт JSON</span>
-    </button>
+    <div class="io-actions">
+      <button class="io-btn" id="export-btn" type="button">
+        <span class="io-ico">⬇</span><span class="io-text">Экспорт JSON</span>
+      </button>
 
-    <button class="io-btn io-btn-danger" id="reset-btn" type="button">
-      <span class="io-ico">⟲</span><span class="io-text">Сброс прогресса</span>
-    </button>
+      <button class="io-btn" id="import-btn" type="button">
+        <span class="io-ico">⬆</span><span class="io-text">Импорт JSON</span>
+      </button>
 
-    <input id="import-file" type="file" accept="application/json" hidden>
-  </div>
+      <button class="io-btn io-btn-danger" id="reset-btn" type="button">
+        <span class="io-ico">⟲</span><span class="io-text">Сброс прогресса</span>
+      </button>
 
-  <div class="io-note">
-    Совет: перед сбросом сделай экспорт — так ты сможешь восстановить прогресс в любой момент.
+      <input id="import-file" type="file" accept="application/json" hidden>
+    </div>
+
+    <div class="io-note">
+      Рекомендуется сделать экспорт перед сбросом.
+    </div>
   </div>
 </div>
 
