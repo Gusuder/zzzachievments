@@ -6,25 +6,25 @@ let versionFilter = "";
 let statusFilter = "";
 let lastJustCompleted = null;
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (m) => ({
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (m) => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    '"': "&quot;",
+    "\"": "&quot;",
     "'": "&#39;"
   }[m]));
 }
 
-function escReg(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function escReg(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function highlightHTML(text, q) {
-  const t = escapeHtml(text || "");
-  if (!q) return t;
-  const r = new RegExp(escReg(q), "gi");
-  return t.replace(r, (m) => `<span class="hl">${m}</span>`);
+function highlightHTML(text, query) {
+  const safe = escapeHtml(text || "");
+  if (!query) return safe;
+  const regex = new RegExp(escReg(query), "gi");
+  return safe.replace(regex, (m) => `<span class="hl">${m}</span>`);
 }
 
 function touchHomeSync() {
@@ -63,7 +63,9 @@ function init() {
   }
 
   const exportBtn = document.getElementById("export-btn");
-  if (exportBtn) exportBtn.addEventListener("click", exportProgressToJson);
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportProgressToJson);
+  }
 
   const importBtn = document.getElementById("import-btn");
   const importFile = document.getElementById("import-file");
@@ -73,7 +75,9 @@ function init() {
   }
 
   const resetBtn = document.getElementById("reset-btn");
-  if (resetBtn) resetBtn.addEventListener("click", resetProgress);
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetProgress);
+  }
 
   const ioPanel = document.querySelector(".io-panel");
   const ioToggle = document.getElementById("io-toggle");
@@ -98,7 +102,10 @@ function loadProgress() {
   userProgress = saved ? JSON.parse(saved) : {};
 
   for (const main in ACHIEVEMENTS) {
-    if (!userProgress[main]) userProgress[main] = {};
+    if (!userProgress[main]) {
+      userProgress[main] = {};
+    }
+
     for (const sub in ACHIEVEMENTS[main].subfilters) {
       if (!userProgress[main][sub]) {
         userProgress[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({
@@ -127,17 +134,22 @@ function getStats(mainKey = null, subKey = null) {
   let gold = 0;
 
   const mains = mainKey ? [mainKey] : Object.keys(ACHIEVEMENTS);
+
   for (const main of mains) {
     const subs = subKey ? [subKey] : Object.keys(ACHIEVEMENTS[main].data);
+
     for (const sub of subs) {
       const achs = ACHIEVEMENTS[main].data[sub];
       const prog = userProgress[main][sub] || [];
+
       achs.forEach((a, i) => {
         total += 1;
         maxPoly += a.reward;
+
         if (prog[i]?.completed) {
           completed += 1;
           earnedPoly += a.reward;
+
           if (a.tier === "bronze") bronze += 1;
           else if (a.tier === "silver") silver += 1;
           else if (a.tier === "gold") gold += 1;
@@ -151,15 +163,28 @@ function getStats(mainKey = null, subKey = null) {
 
 function updateGlobalStats() {
   const global = getStats();
+
   const globalAch = document.getElementById("global-ach");
   const globalPoly = document.getElementById("global-poly");
   const currentFilter = document.getElementById("current-filter");
   const currentSubfilter = document.getElementById("current-subfilter");
 
-  if (globalAch) globalAch.textContent = `${global.completed}/${global.total}`;
-  if (globalPoly) globalPoly.textContent = `${global.earnedPoly}/${global.maxPoly}`;
-  if (currentFilter) currentFilter.textContent = ACHIEVEMENTS[currentMain]?.name || "—";
-  if (currentSubfilter) currentSubfilter.textContent = ACHIEVEMENTS[currentMain]?.subfilters[currentSub]?.name || "—";
+  if (globalAch) {
+    globalAch.textContent = `${global.completed}/${global.total}`;
+  }
+
+  if (globalPoly) {
+    globalPoly.textContent = `${global.earnedPoly}/${global.maxPoly}`;
+  }
+
+  if (currentFilter) {
+    currentFilter.textContent = ACHIEVEMENTS[currentMain]?.name || "—";
+  }
+
+  if (currentSubfilter) {
+    currentSubfilter.textContent =
+      ACHIEVEMENTS[currentMain]?.subfilters[currentSub]?.name || "—";
+  }
 
   const tierSummary = document.getElementById("tier-summary");
   if (tierSummary) {
@@ -176,7 +201,10 @@ function updateSubfilterStats() {
 
   const nameEl = document.getElementById("subfilter-name");
   const statsEl = document.getElementById("subfilter-stats");
-  if (nameEl) nameEl.textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
+
+  if (nameEl) {
+    nameEl.textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
+  }
 
   if (statsEl) {
     statsEl.innerHTML =
@@ -186,7 +214,9 @@ function updateSubfilterStats() {
 
   const percent = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
   const bar = document.getElementById("subfilter-progress-bar");
-  if (bar) bar.style.width = `${percent}%`;
+  if (bar) {
+    bar.style.width = `${percent}%`;
+  }
 }
 
 function renderTabs() {
@@ -194,9 +224,10 @@ function renderTabs() {
   if (!tabs) return;
 
   tabs.innerHTML = "";
+
   for (const key in ACHIEVEMENTS) {
     const tab = document.createElement("div");
-    tab.className = "tab" + (key === currentMain ? " active" : "");
+    tab.className = `tab${key === currentMain ? " active" : ""}`;
     tab.textContent = ACHIEVEMENTS[key].name;
     tab.dataset.main = key;
 
@@ -218,6 +249,7 @@ function renderSubfilters() {
   if (!container) return;
 
   container.innerHTML = "";
+
   const subfilters = ACHIEVEMENTS[currentMain].subfilters;
 
   for (const key in subfilters) {
@@ -225,7 +257,8 @@ function renderSubfilters() {
     const percent = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
 
     const item = document.createElement("div");
-    item.className = "subfilter" + (key === currentSub ? " active" : "");
+    item.className = `subfilter${key === currentSub ? " active" : ""}`;
+
     item.innerHTML = `
       <div class="subfilter-content">
         <span class="subfilter-name">${subfilters[key].name}</span>
@@ -276,7 +309,8 @@ function renderAchievements() {
   });
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div style="text-align:center; padding:30px; color:#777">Ничего не найдено</div>`;
+    list.innerHTML =
+      `<div style="text-align:center; padding:30px; color:#777">Ничего не найдено</div>`;
     updateSubfilterStats();
     return;
   }
@@ -286,7 +320,7 @@ function renderAchievements() {
     const prog = progress[realIndex] || { completed: false, date: "" };
 
     const item = document.createElement("div");
-    item.className = `ach-item ${prog.completed ? "completed" : ""}`;
+    item.className = `ach-item${prog.completed ? " completed" : ""}`;
     item.dataset.tier = ach.tier;
 
     if (
@@ -338,7 +372,8 @@ function renderAchievements() {
 
     const reward = document.createElement("div");
     reward.className = "reward";
-    reward.innerHTML = `<span class="chip chip--poly"><img src="icons/poly.png" alt="✦"><b>${ach.reward}</b></span>`;
+    reward.innerHTML =
+      `<span class="chip chip--poly"><img src="icons/poly.png" alt="✦"><b>${ach.reward}</b></span>`;
     footer.appendChild(reward);
 
     if (prog.completed && prog.date) {
@@ -382,18 +417,27 @@ function toggleAchievement(index) {
 
 function buildProgressById() {
   const byId = {};
+
   for (const main in ACHIEVEMENTS) {
     byId[main] = {};
+
     for (const sub in ACHIEVEMENTS[main].data) {
       byId[main][sub] = {};
+
       const list = ACHIEVEMENTS[main].data[sub];
-      const progArr = (userProgress[main] && userProgress[main][sub]) ? userProgress[main][sub] : [];
+      const progArr =
+        (userProgress[main] && userProgress[main][sub]) ? userProgress[main][sub] : [];
+
       list.forEach((a, i) => {
         const p = progArr[i] || { completed: false, date: "" };
-        byId[main][sub][a.id] = { completed: !!p.completed, date: p.date || "" };
+        byId[main][sub][a.id] = {
+          completed: !!p.completed,
+          date: p.date || ""
+        };
       });
     }
   }
+
   return byId;
 }
 
@@ -430,12 +474,13 @@ function handleImportFile(e) {
   if (!file) return;
 
   const reader = new FileReader();
+
   reader.onload = () => {
     try {
       const text = String(reader.result || "");
       const parsed = JSON.parse(text);
       importProgressFromJson(parsed);
-    } catch (err) {
+    } catch {
       alert("Не удалось прочитать JSON-файл. Проверь формат.");
     } finally {
       e.target.value = "";
@@ -447,15 +492,27 @@ function handleImportFile(e) {
 
 function importProgressFromJson(data) {
   const next = {};
+
   for (const main in ACHIEVEMENTS) {
     next[main] = {};
+
     for (const sub in ACHIEVEMENTS[main].subfilters) {
-      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({ completed: false, date: "" }));
+      next[main][sub] = ACHIEVEMENTS[main].data[sub].map(() => ({
+        completed: false,
+        date: ""
+      }));
     }
   }
 
-  const byId = (data && data.progressById && typeof data.progressById === "object") ? data.progressById : null;
-  const legacy = (!byId && data && typeof data === "object") ? data : null;
+  const byId =
+    (data && data.progressById && typeof data.progressById === "object")
+      ? data.progressById
+      : null;
+
+  const legacy =
+    (!byId && data && typeof data === "object")
+      ? data
+      : null;
 
   for (const main in ACHIEVEMENTS) {
     for (const sub in ACHIEVEMENTS[main].data) {
@@ -469,7 +526,12 @@ function importProgressFromJson(data) {
             next[main][sub][i].date = item.date ? String(item.date) : "";
           }
         });
-      } else if (legacy && legacy[main] && legacy[main][sub] && Array.isArray(legacy[main][sub])) {
+      } else if (
+        legacy &&
+        legacy[main] &&
+        legacy[main][sub] &&
+        Array.isArray(legacy[main][sub])
+      ) {
         legacy[main][sub].forEach((p, i) => {
           if (!next[main][sub][i]) return;
           next[main][sub][i].completed = !!(p && p.completed);
@@ -492,6 +554,7 @@ function resetProgress() {
   const ok = confirm(
     "Сбросить весь прогресс? Это действие нельзя отменить.\n\nСовет: нажми «Отмена», сделай экспорт и потом сброс."
   );
+
   if (!ok) return;
 
   localStorage.removeItem("zzz_ach_progress_v2");
