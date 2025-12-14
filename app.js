@@ -113,8 +113,8 @@ function updateGlobalStats() {
 function updateSubfilterStats() {
   const stats = getStats(currentMain, currentSub);
   document.getElementById("subfilter-name").textContent = ACHIEVEMENTS[currentMain].subfilters[currentSub].name;
-  document.getElementById("subfilter-stats").textContent =
-    `Достижений: ${stats.completed}/${stats.total} • Полихром: ${stats.earnedPoly}/${stats.maxPoly}`;
+  document.getElementById("subfilter-stats").innerHTML =
+    `Достижений: <b>${stats.completed}/${stats.total}</b> • <img src="icons/poly.png" alt="✦" class="poly-icon poly-icon--mini"> Полихром: <b>${stats.earnedPoly}/${stats.maxPoly}</b>`;
 }
 
 function renderTabs() {

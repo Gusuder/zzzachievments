@@ -744,3 +744,27 @@ body::after {
   }
 }
 
+.subfilter-header {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.subfilter-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0; /* убираем лишний отступ */
+  white-space: nowrap;
+}
+
+.poly-icon--mini {
+  width: 16px;
+  height: 16px;
+  transform: none;
+  filter: drop-shadow(0 0 8px rgba(0,230,230,0.12));
+}
+
+.subfilter-stats .poly-icon--mini:hover {
+  transform: none; /* чтобы в хедере не "прыгала" */
+}
+
