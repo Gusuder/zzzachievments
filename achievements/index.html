@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenless Zone Zero — Трекеры</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <header class="header">
+      <div class="title">Zenless Zone Zero</div>
+      <div class="subtitle">Центр отслеживания прогресса</div>
+    </header>
+
+    <div class="home-cards">
+
+      <!-- ================================================= -->
+      <!-- ========== ACHIEVEMENTS CARD ==================== -->
+      <!-- ================================================= -->
+      <div class="home-card achievements">
+
+        <!-- ===== Banner / Pseudo Screenshot ===== -->
+        <div class="card-banner card-banner--ach">
+          <div class="card-banner__hud">
+            <div class="hud-left">
+              <span class="hud-dot"></span>
+              <span class="hud-text">ACH TRACKER</span>
+              <span class="hud-chip">v2</span>
+            </div>
+
+            <div class="hud-right">
+              <span class="hud-chip hud-chip--poly">
+                <img src="icons/poly.png" alt="✦">
+                <b id="card-poly">0/0</b>
+              </span>
+            </div>
+          </div>
+
+          <div class="card-banner__screen">
+            <div class="screen-tabs">
+              <span class="screen-tab is-on">История</span>
+              <span class="screen-tab">Город</span>
+              <span class="screen-tab">Тактика</span>
+              <span class="screen-tab">Исслед.</span>
+            </div>
+
+            <div class="screen-grid">
+              <div class="screen-col">
+                <div class="screen-line"><span></span></div>
+                <div class="screen-line"><span></span></div>
+                <div class="screen-line"><span></span></div>
+                <div class="screen-line"><span></span></div>
+              </div>
+
+              <div class="screen-col screen-col--cards">
+                <div class="mini-ach">
+                  <div class="mini-badge">
+                    <img src="icons/bronze.png" alt="B">
+                  </div>
+                  <div class="mini-bar"></div>
+                  <div class="mini-rew">
+                    <img src="icons/poly.png" alt="✦"><b>5</b>
+                  </div>
+                </div>
+
+                <div class="mini-ach">
+                  <div class="mini-badge">
+                    <img src="icons/silver.png" alt="S">
+                  </div>
+                  <div class="mini-bar"></div>
+                  <div class="mini-rew">
+                    <img src="icons/poly.png" alt="✦"><b>10</b>
+                  </div>
+                </div>
+
+                <div class="mini-ach">
+                  <div class="mini-badge">
+                    <img src="icons/gold.png" alt="G">
+                  </div>
+                  <div class="mini-bar"></div>
+                  <div class="mini-rew">
+                    <img src="icons/poly.png" alt="✦"><b>20</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="screen-footer">
+              <span class="hud-chip">
+                Выполнено: <b id="card-ach">0/0</b>
+              </span>
+              <span class="screen-signal"></span>
+            </div>
+          </div>
+        </div>
+        <!-- ===== / Banner ===== -->
+
+        <h2>Трекер достижений</h2>
+        <p>
+          Отслеживай выполнение достижений Zenless Zone Zero и количество
+          полученного полихрома.
+        </p>
+
+        <button class="open-btn" onclick="openAchievements()">
+          Открыть трекер
+        </button>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- ========== ARCADE (COMING SOON) ================= -->
+      <!-- ================================================= -->
+      <div class="home-card locked">
+        <h2>Аркады</h2>
+        <p>Будет добавлено позже</p>
+        <div class="lock">🔒</div>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- ========== MEOWCHELO (COMING SOON) =============== -->
+      <!-- ================================================= -->
+      <div class="home-card locked">
+        <h2>Квесты Мяучело</h2>
+        <p>Будет добавлено позже</p>
+        <div class="lock">🔒</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="home.js"></script>
+</body>
+</html>
